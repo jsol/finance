@@ -1,0 +1,25 @@
+{{ define "users" }}
+{{ template "header"  "Finance Users"  }}
+
+<h1>Users</h1>
+<div id = "users">
+  {{ template "user_list" . }}
+</div>
+
+<h1>Add user</h1>
+<form  id="add_user_form" hx-post="/user/add"  hx-target="#users" hx-swap="innerHTML">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name: </label>
+    <input id="name" name="name" type="text"  class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="factor" class="form-label">Factor: </label>
+    <input id="factor" name="factor" type="text"  class="form-control">
+  </div>
+  <button type="submit" id = "submit-user">Add</button>
+</form>
+
+{{ template "footer"  }}
+
+{{end}}

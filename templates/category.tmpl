@@ -1,0 +1,21 @@
+{{ define "category_details" }}
+{{ template "header"  "Finance Categories"  }}
+
+<h1>Categories</h1>
+<div id = "categories">
+  {{ template "category_list" . }}
+</div>
+
+<h1>Add category</h1>
+<form  id="add_category_form" hx-post="/category/add"  hx-target="#categories" hx-swap="innerHTML">
+  <div class="mb-3">
+    <label for="name" class="form-label">Name: </label>
+    <input id="name" name="name" type="text"  class="form-control">
+  </div>
+
+  <button type="submit" id = "submit-category">Add</button>
+</form>
+
+{{ template "footer"  }}
+
+{{end}}

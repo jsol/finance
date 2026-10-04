@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS items (
+ id BLOB NOT NULL PRIMARY KEY,
+ period TEXT NOT NULL,
+ sum INTEGER,
+ who TEXT NOT NULL,
+ cat BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+ id BLOB NOT NULL PRIMARY KEY,
+ name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS patterns (
+ id BLOB NOT NULL PRIMARY KEY,
+ pattern TEXT NOT NULL,
+ category BLOB NOT NULL,
+ FOREIGN KEY (category) REFERENCES categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  name TEXT NOT NULL,
+  factor INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS period_index ON items (period);

@@ -1,0 +1,50 @@
+{{ define "add" }}
+
+
+<form  id="add_item_form" hx-post="/add"  hx-target="#period" hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful) document.getElementById('sum').value='';sendQueueDo()">
+  <div class="mb-3">
+    <label for="who" class="form-label">Who: </label><select id="who" name="who"  class="form-control">
+      {{range .Users}}
+        <option>{{ . }}
+      {{end}}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="cat" class="form-label">Category: </label><select id="cat" name="cat" type="text"  class="form-control">
+    {{range $id, $data := .Categories}}
+        <option value="{{ $id }}"> {{ $data.Name }}
+    {{end}}
+    </select>
+  </div>
+
+  <div  class="mb-3">
+    <label for="sum"  class="form-label">Sum: </label><input id="sum" name="sum" type="text"  class="form-control">
+  </div>
+ 
+  <input type="hidden" name="period" value="{{ .Period }}">
+
+  <button type="submit" id = "submit-expense">Add</button>
+</form>
+
+<script>
+/*
+console.log("Applying event", document.getElementById("list-expenses-div"));
+document.getElementById("period").addEventListener("htmx:beforeSwap", (event)=>{
+
+    if (event.detail.serverResponse == '') {
+    return
+    }
+
+  console.log("Swapping", event.detail)
+  console.log("Target:",   event.detail.target )
+  console.log("New target name:", "list-" + event.detail.requestConfig.formData.get("cat"))
+  console.log("New target:",  document.getElementById("list-" + event.detail.requestConfig.formData.get("cat")))
+
+  event.detail.target = document.getElementById("list-" + event.detail.requestConfig.formData.get("cat"))
+
+})
+*/
+</script>
+
+{{ end }}

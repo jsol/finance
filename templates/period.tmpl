@@ -1,0 +1,52 @@
+
+{{ define "period" }}
+  <div id="period" data-periodid="{{ .Period }}">
+    {{range $name, $data := .Categories}}
+    <div>
+        {{ template "category" $data }}
+        <hr>
+     </div>
+    {{end}}
+    <div>
+      <div id = "users">
+        <h3>Spent during the period:</h3>
+        {{ $targets := .Total.Targets }}
+        {{ range $name, $sum := .Total.Sums}}
+        <div>
+          {{ $target := index $targets $name }}
+          <span>{{ $name}}:</span> {{ toNormal $sum }} ({{ toNormal $target }})
+        </div>
+      {{end}}
+    </div>
+    <div id = "total">
+      Total: {{ toNormal .Total.Sum }}
+    </div>
+    <div id = "balance">
+     {{ if gt .Total.Owed  0 }}
+     {{ .Total.Deptor }} owes {{ .Total.Lender }} {{ toNormal .Total.Owed  }}
+     {{ end }}
+    </div>
+   </div>
+ </div>
+{{end}}
+
+
+{{ define "category" }}
+  <h3>{{ .Name }}</h3>
+
+  {{range $name, $data := .Users}}
+    {{ template "user" $data }}
+  {{end}}
+<div>Total: {{ toNormal .Sum }} </div>
+{{end}}
+
+{{ define "user" }}
+  {{ $id := getUUID }}
+  <div><span onClick="toggleHidden('{{ $id }}')">{{ .Name }}: </span> <span class="text-right">{{ toNormal .Sum  }}</span>
+    <div id="{{ $id }}" class="hidden"> 
+    {{ range $info := .Lines }}
+    {{ toNormal $info.Sum }} <button hx-get="/delete/{{ $info.Id }}" hx-target="#period" hx-swap="outerHTML">(X)</button>
+    {{ end }}
+    </div>
+  </div>
+{{end}}

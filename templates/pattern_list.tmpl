@@ -1,0 +1,26 @@
+{{ define "pattern_list" }}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Pattern</th>
+      <th scope="col">Category</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {{ range $id, $data := .Patterns }}
+    <tr>
+      <td>{{ $data.Pattern }}</td>
+      <td>{{ catToString $data.Category }}</td>
+      <td>
+        <button hx-get="/pattern/delete?id={{ toString $data.ID }}" hx-target="#patterns" hx-swap="innerHTML" class="btn btn-danger">Delete</button>
+      </td>
+    </tr>
+  {{end}}
+
+  </tbody>
+</table>
+{{end}}
+

@@ -1,0 +1,30 @@
+{{ define "category_list" }}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {{ range $id, $data := . }}
+    <tr>
+      <td>
+        <form method="post" hx-post="/category/update" hx-target="#categories" hx-swap="innerHTML">
+            <input type="hidden" name="id" value="{{ catToString $data.ID }}">
+            <input type="text" name = "name" value="{{ $data.Name }}" class="form-control">
+            <button type="submit" id = "submit-category" class="btn btn-primary">Update</button>
+        </form>
+      </td>
+      <td>
+        <button hx-get="/category/delete?id={{ catToString $data.ID }}" hx-target="#categories" hx-swap="innerHTML" class="btn btn-danger">Delete</button>
+      </td>
+    </tr>
+  {{end}}
+
+  </tbody>
+</table>
+{{end}}
+

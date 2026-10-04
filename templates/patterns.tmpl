@@ -1,0 +1,29 @@
+{{ define "patterns" }}
+{{ template "header"  "Finance Patterns"  }}
+
+<h1>Import Patterns</h1>
+<div id = "patterns">
+  {{ template "pattern_list" . }}
+</div>
+
+<h1>Add Pattern</h1>
+<form  id="add_item_form" hx-post="/pattern/add"  hx-target="#patterns" hx-swap="innerHTML">
+  <div class="mb-3">
+    <label for="pattern" class="form-label">Pattern: </label>
+    <input id="pattern" name="pattern" type="text"  class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="cat" class="form-label">Category: </label><select id="cat" name="category" type="text"  class="form-control">
+    {{range $id, $data := .Categories}}
+        <option value="{{ catToString $data.ID }}"> {{ $data.Name }}
+    {{end}}
+    </select>
+  </div>
+
+  <button type="submit" id = "submit-expense">Add</button>
+</form>
+
+{{ template "footer"  }}
+
+{{end}}

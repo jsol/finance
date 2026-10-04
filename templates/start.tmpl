@@ -1,0 +1,255 @@
+{{ define "start" }}
+{{ template "header"  "Finance"  }}
+
+<h1>{{ .PeriodNice }}</h1>
+<div>
+  <button  onclick="window.location.href='?period={{ .Previous }}'">
+  Previous
+  </button>
+  <button hx-get = "/import-modal?period={{ .Period }}"
+    hx-target="#import-modal"
+    hx-trigger="click" 
+    data-bs-toggle="modal" 
+    data-bs-target="#import-modal"
+    class="btn btn-secondary">Import</button>
+  <button onclick="window.location.href='?period={{ .Next }}'">
+  Next
+  </button>
+</div>
+<div class="container">
+<div class="row mt-4 g-4">
+    <div class="col">
+    {{ template "period" . }}
+    </div>
+
+    <div class="col">
+    {{ template "add" . }}
+    </div>
+</div>
+</div>
+
+<div class="small" tabindex="-1">
+Modify users <a href="/user">here</a><br>
+Modify categories <a href="/category">here</a><br>
+Modify import patterns <a href="/pattern">here</a>
+</div>
+
+<div  id = "import-modal"
+  class = "modal modal-blur fade"
+  style = "display: none"
+  aria-hidden = "false"
+  tabindex = "-1">
+  <div class = "modal-dialog modal-lg modal-dialog-centered" role = "document">
+    <div class = "modal-content"></div>
+  </div>
+</div>
+{{ template "footer"  }}
+
+<script>
+
+      const categories = [{id:'ignore', name: 'Ignore'}
+    {{range $id, $data := .Categories}}
+        ,{ id: {{ $id }}, name: {{ $data.Name }} }
+    {{end}}
+      ]
+      const matches = {
+        {{range $id, $data := .Patterns}}
+          '{{ $id }}':
+            [
+              {{range $pattern := $data}}
+                '{{ . }}',
+              {{end}}
+            ]
+          ,
+          {{end}}
+      }
+
+      const sendPeriod = {{ .Period }}
+      
+
+
+      function toDate(id) {
+        const parts = id.split('-')
+
+        if (parts[1].length < 2) {
+          parts[1] = '0' + parts[1]
+        }
+
+        return parts.join('-')
+      }
+
+      function addOpt($select, text, cat) {
+          $opt = document.createElement('option')
+
+          if (!cat) {
+            return
+          }
+
+          $opt.value = cat.id
+          $opt.innerHTML = cat.name
+          $select.appendChild($opt)
+
+        if (!matches[cat.id] || !text) {
+          return
+        }
+
+            for (const search of matches[cat.id]) {
+              if (text.indexOf(search) >= 0) {
+                $opt.selected = true 
+              }
+            }
+      }
+
+function addRow(date, text, sum) {
+
+  const $line = document.createElement('tr')
+  const $date = document.createElement('td')
+  const $text = document.createElement('td')
+  const $sum = document.createElement('td')
+  const $category = document.createElement('td')
+
+  $catSelect = document.createElement('select')
+  for (opt of categories) {
+    addOpt($catSelect, text, opt)
+  }
+
+  $date.innerHTML = date
+  $text.innerHTML = text
+  $sum.innerHTML = ( (+sum) * -1) + ""
+  $category.appendChild($catSelect)
+
+  $sum.classList.add('sum')
+  
+  $line.appendChild($date)
+  $line.appendChild($text)
+  $line.appendChild($sum)
+  $line.appendChild($category)
+
+  $table = document.getElementById('data')
+  $table.appendChild($line)
+}
+
+function parseSEB(lines) {
+  const dateFilter = toDate(sendPeriod)
+  
+  for (line of lines) {
+    const [date, ign, ign2, text, sum, ign3] = line.split(';')
+
+    if ((sum * 1) > 0 || !date || !sum) {
+      continue
+    }
+
+    if (date.indexOf(dateFilter) == 0) {
+      addRow(date, text, sum)
+    }
+  }
+}
+
+function parseCsv(csv) {
+
+  const lines = csv.split('\n')
+
+  const header = lines.shift()
+
+  if (header == "Bokföringsdatum;Valutadatum;Verifikationsnummer;Text;Belopp;Saldo") {
+    return parseSEB(lines)
+  }
+
+  console.log("Unknownd file format")
+
+}
+const sendQueue = []
+function sendQueueAdd(cat, who, sum) {
+  const req = {
+    cat, who, sum 
+  }
+
+  console.log("queueing", req)
+  sendQueue.push(req)
+}
+
+function sendQueueDo() {
+  $formSum = document.getElementById('sum')
+
+  if ($formSum.value != '') {
+    return
+  }
+
+  const req = sendQueue.pop()
+
+  if(!req) {
+    return
+  }
+
+  console.log("sending", req)
+
+  $formCat = document.getElementById('cat')
+  $formWho = document.getElementById('who')
+  $formButton = document.getElementById('submit-expense')
+          
+  $formSum.value = req.sum
+  $formCat.value = req.cat
+  $formWho.value = req.who
+          
+  $formButton.click()
+}
+
+
+
+      function readFile(e) {
+        const file = e.target.files[0]
+        if (!file) {
+          return
+        }
+
+        const reader = new FileReader()
+
+        reader.onload = (e) => {
+            const content = e.target.result
+
+          parseCsv(content)
+        }
+
+        reader.readAsText(file)
+      }
+
+      
+      function submitSelected() {
+        $table = document.getElementById('data')
+        remove = []
+        toSend = {}
+
+        for ($row of $table.rows) {
+          sum = $row.querySelector('.sum').textContent
+          cat = $row.querySelector('select').value
+
+          if (cat == 'ignore') {
+            continue
+          }
+
+          remove.push($row)
+          console.log("Add expense ", sum, " for category", cat)
+
+          if (!toSend[cat]) {
+            toSend[cat] = []
+          }
+
+          toSend[cat].push(sum)
+        }
+
+        while ($row = remove.pop()) {
+          $table.removeChild($row)
+        }
+
+        for (const [cat, sums] of Object.entries(toSend)) {
+          const sum = sums.join('+')
+          
+          $importWho = document.getElementById('import-who')
+
+          sendQueueAdd(cat, $importWho.value, sum)
+
+        }
+        sendQueueDo()
+      }
+      </script>
+{{end}}

@@ -1,0 +1,35 @@
+{{ define "import_modal" }}
+<div class = "modal-dialog modal-dialog-centered">
+  <div class = "modal-content">
+    <div class = "modal-header">
+      <h5 class = "modal-title">
+        Import transactions for {{ .PeriodNice }}
+      </h5>
+    </div>
+    <div class = "modal-body">
+     <input type = "file" id = "file-input">
+     <pre id = "output"></pre>
+     <table>
+       <tbody id = "data">
+       </tbody>
+     </table>
+     <div class="mb-3">
+       <label for="import-who" class="form-label">Who: </label><select id="import-who" name="import-who"  class="form-control">
+         {{range .Users}}
+           <option>{{ . }}
+         {{end}}
+       </select>
+     </div>
+    </div>
+    <div class = "modal-footer">
+      <button id = "add" class = "btn btn-primary">Add</button>
+      <button id = "done" class = "btn btn-secondary" data-bs-dismiss="modal">Done</button>
+    </div>
+  </div>
+</div>
+  
+    <script>
+    document.getElementById('file-input').addEventListener('change', readFile, false)
+    document.getElementById('add').addEventListener('click', submitSelected, false)
+    </script>
+{{ end }}

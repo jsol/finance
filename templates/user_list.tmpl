@@ -1,0 +1,32 @@
+{{ define "user_list" }}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Factor</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {{ range $id, $name := .Users }}
+    <tr>
+      <td>{{ $name }}</td>
+      <td>
+        <form method="post" hx-post="/user/update" hx-target="#users" hx-swap="innerHTML">
+            <input type="hidden" name="name" value="{{ $name }}">
+            <input type="text" name = "factor" value="{{ index $.Incomes $name }}" class="form-control">
+            <button type="submit" id = "submit-user" class="btn btn-primary">Update</button>
+        </form>
+      </td>
+      <td>
+        <button hx-get="/user/delete?id={{ $name }}" hx-target="#users" hx-swap="innerHTML" class="btn btn-danger">Delete</button>
+      </td>
+    </tr>
+  {{end}}
+
+  </tbody>
+</table>
+{{end}}
+
